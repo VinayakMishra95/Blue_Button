@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced Blue Button</title>
+  <style>
+    body {
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .ripple-button {
+      position: relative;
+      background-color: #007BFF;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(0, 123, 255, 0.4);
+      transition: transform 0.1s ease, background-color 0.3s ease;
+    }
+
+    .ripple-button:hover {
+      background-color: #0056b3;
+    }
+
+    .ripple-button:active {
+      transform: scale(0.98);
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      animation: ripple-animation 0.6s linear;
+      pointer-events: none;
+    }
+
+    @keyframes ripple-animation {
+      from {
+        transform: scale(0);
+        opacity: 1;
+      }
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      fill: white;
+    }
+  </style>
+</head>
+<body>
+
+  <button class="ripple-button" onclick="createRipple(event)">
+    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+    </svg>
+    Learn More
+  </button>
+
+  <script>
+    function createRipple(event) {
+      const button = event.currentTarget;
+      const circle = document.createElement("span");
+      const diameter = Math.max(button.clientWidth, button.clientHeight);
+      const radius = diameter / 2;
+
+      circle.style.width = circle.style.height = `${diameter}px`;
+      circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
+      circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
+      circle.classList.add("ripple");
+
+      const ripple = button.getElementsByClassName("ripple")[0];
+      if (ripple) ripple.remove();
+
+      button.appendChild(circle);
+    }
+  </script>
+
+</body>
+</html>
