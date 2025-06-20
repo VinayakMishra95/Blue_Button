@@ -1,96 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Advanced Blue Button</title>
-  <style>
-    body {
-      background: #f0f2f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ultra-Advanced Blue Button with Microinteractions and Easter Eggs</title>
+<style>
+  body {
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    cursor: crosshair;
+  }
 
-    .ripple-button {
-      position: relative;
-      background-color: #007BFF;
-      color: white;
-      padding: 12px 24px;
-      font-size: 16px;
-      font-weight: 600;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 14px rgba(0, 123, 255, 0.4);
-      transition: transform 0.1s ease, background-color 0.3s ease;
-    }
+  .ripple-button {
+    position: relative;
+    background-color: #007BFF;
+    color: white;
+    padding: 12px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 10px 10px 20px #2a2f45, -10px -10px 20px #5c83ff;
+    transition:
+      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      border-radius 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      background-color 0.3s ease,
+      box-shadow 0.1s ease;
+    user-select: none;
+    animation: breathing 4s ease-in-out infinite;
+  }
 
-    .ripple-button:hover {
-      background-color: #0056b3;
+  @keyframes breathing {
+    0%, 100% {
+      box-shadow:
+        10px 10px 20px #2a2f45,
+        -10px -10px 20px #5c83ff;
     }
+    50% {
+      box-shadow:
+        14px 14px 28px #222a3d,
+        -14px -14px 28px #7a94ff;
+    }
+  }
 
-    .ripple-button:active {
-      transform: scale(0.98);
-    }
+  .icon {
+    width: 18px;
+    height: 18px;
+    fill: white;
+    flex-shrink: 0;
+  }
 
-    .ripple {
-      position: absolute;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.5);
-      animation: ripple-animation 0.6s linear;
-      pointer-events: none;
-    }
+  .ripple-button:hover {
+    border-radius: 24px 6px 24px 6px;
+    transform: scale(1.06);
+    background-color: #0056b3;
+  }
 
-    @keyframes ripple-animation {
-      from {
-        transform: scale(0);
-        opacity: 1;
-      }
-      to {
-        transform: scale(4);
-        opacity: 0;
-      }
-    }
+  .ripple-button:active {
+    transform: scale(0.95);
+    animation-play-state: paused;
+  }
 
-    .icon {
-      width: 18px;
-      height: 18px;
-      fill: white;
+  .ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    animation: ripple-animation linear forwards;
+    pointer-events: none;
+    transform: scale(0);
+    opacity: 1;
+  }
+
+  @keyframes ripple-animation {
+    to {
+      transform: scale(4);
+      opacity: 0;
     }
-  </style>
+  }
+
+  .highlight {
+    position: absolute;
+    pointer-events: none;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    filter: blur(60px);
+    mix-blend-mode: screen;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.2s ease;
+    opacity: 0;
+  }
+</style>
 </head>
 <body>
 
-  <button class="ripple-button" onclick="createRipple(event)">
-    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-      <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-    </svg>
-    Learn More
-  </button>
+<button class="ripple-button" id="button" aria-label="Learn More Button" tabindex="0">
+  <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+  </svg>
+  Learn More
+  <div class="highlight" id="highlight"></div>
+</button>
 
-  <script>
-    function createRipple(event) {
-      const button = event.currentTarget;
-      const circle = document.createElement("span");
-      const diameter = Math.max(button.clientWidth, button.clientHeight);
-      const radius = diameter / 2;
+<script>
+  const button = document.getElementById('button');
+  const highlight = document.getElementById('highlight');
 
-      circle.style.width = circle.style.height = `${diameter}px`;
-      circle.style.left = `${event.clientX - button.getBoundingClientRect().left - radius}px`;
-      circle.style.top = `${event.clientY - button.getBoundingClientRect().top - radius}px`;
-      circle.classList.add("ripple");
+  // For triple click detection
+  let clickTimes = [];
 
-      const ripple = button.getElementsByClassName("ripple")[0];
-      if (ripple) ripple.remove();
+  // For secret key combo detection
+  const secretCode = ['u','n','l','o','c','k'];
+  let secretIndex = 0;
 
-      button.appendChild(circle);
+  // Track last click time for ripple speed calculation
+  let lastClickTime = 0;
+
+  // Dynamic Neumorphic lighting with highlight
+  window.addEventListener('mousemove', e => {
+    const rect = button.getBoundingClientRect();
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    if (
+      mouseX >= rect.left && mouseX <= rect.right &&
+      mouseY >= rect.top && mouseY <= rect.bottom
+    ) {
+      highlight.style.opacity = '1';
+      highlight.style.left = `${mouseX - rect.left}px`;
+      highlight.style.top = `${mouseY - rect.top}px`;
+
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const offsetX = (mouseX - rect.left - centerX) / 8;
+      const offsetY = (mouseY - rect.top - centerY) / 8;
+
+      button.style.boxShadow = `
+        ${offsetX}px ${offsetY}px 20px #2a2f45,
+        ${-offsetX}px ${-offsetY}px 20px #5c83ff
+      `;
+    } else {
+      highlight.style.opacity = '0';
+      button.style.boxShadow = `
+        10px 10px 20px #2a2f45,
+        -10px -10px 20px #5c83ff
+      `;
     }
-  </script>
+  });
+
+  button.addEventListener('click', e => {
+    const now = performance.now();
+    const timeSinceLastClick = now - lastClickTime;
+    lastClickTime = now;
+
+    // Triple-click detection
+    clickTimes.push(now);
+    clickTimes = clickTimes.filter(t => now - t < 600);
+    if (clickTimes.length >= 3) {
+      const originalText = button.innerHTML;
+      button.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> Surprise! 🎉`;
+      setTimeout(() => {
+        button.innerHTML = originalText;
+      }, 3000);
+      clickTimes = [];
+    }
+
+    // Shift+click: rainbow flash
+    if (e.shiftKey) {
+      const originalBg = button.style.backgroundColor;
+      let colors = ['#ff0000','#ff7f00','#ffff00','#00ff00','#0000ff','#4b0082','#9400d3'];
+      let i = 0;
+      const interval = setInterval(() => {
+        button.style.backgroundColor = colors[i];
+        i++;
+        if (i >= colors.length) {
+          clearInterval(interval);
+          button.style.backgroundColor = originalBg || '#007BFF';
+        }
+      }, 150);
+    }
+
+    // Ripple effect with speed-dependent animation duration and size
+    const circle = document.createElement('span');
+    const diameter = Math.max(button.clientWidth, button.clientHeight);
+    const rippleSize = Math.min(diameter * (timeSinceLastClick < 300 ? 0.7 : 1), diameter);
+
+    circle.style.width = circle.style.height = `${rippleSize}px`;
+    circle.style.left = `${e.clientX - button.getBoundingClientRect().left - rippleSize / 2}px`;
+    circle.style.top = `${e.clientY - button.getBoundingClientRect().top - rippleSize / 2}px`;
+    circle.classList.add('ripple');
+    circle.style.animationDuration = `${timeSinceLastClick < 300 ? 300 : 600}ms`;
+
+    const ripple = button.querySelector('.ripple');
+    if (ripple) ripple.remove();
+
+    button.appendChild(circle);
+  });
+
+  // Secret key combo detection
+  button.addEventListener('keydown', e => {
+    if (e.key.toLowerCase() === secretCode[secretIndex]) {
+      secretIndex++;
+      if (secretIndex === secretCode.length) {
+        alert('Button Unlocked! 🚀');
+        secretIndex = 0;
+      }
+    } else {
+      secretIndex = 0;
+    }
+  });
+</script>
 
 </body>
 </html>
