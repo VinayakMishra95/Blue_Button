@@ -1,224 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ultra-Advanced Blue Button with Microinteractions and Easter Eggs</title>
-<style>
-  body {
-    background: #f0f2f5;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    cursor: crosshair;
-  }
-
-  .ripple-button {
-    position: relative;
-    background-color: #007BFF;
-    color: white;
-    padding: 12px 28px;
-    font-size: 16px;
-    font-weight: 600;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 10px 10px 20px #2a2f45, -10px -10px 20px #5c83ff;
-    transition:
-      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-      border-radius 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-      background-color 0.3s ease,
-      box-shadow 0.1s ease;
-    user-select: none;
-    animation: breathing 4s ease-in-out infinite;
-  }
-
-  @keyframes breathing {
-    0%, 100% {
-      box-shadow:
-        10px 10px 20px #2a2f45,
-        -10px -10px 20px #5c83ff;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ultra-Advanced Blue Button + Progress Bar</title>
+  <style>
+    body {
+      background: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      cursor: crosshair;
+      font-family: sans-serif;
+      padding: 20px;
+      text-align: center;
     }
-    50% {
-      box-shadow:
-        14px 14px 28px #222a3d,
-        -14px -14px 28px #7a94ff;
+
+    .ripple-button {
+      position: relative;
+      background-color: #007BFF;
+      color: white;
+      padding: 12px 28px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 10px 10px 20px #2a2f45, -10px -10px 20px #5c83ff;
+      transition: all 0.3s ease;
+      user-select: none;
+      animation: breathing 4s ease-in-out infinite;
     }
-  }
 
-  .icon {
-    width: 18px;
-    height: 18px;
-    fill: white;
-    flex-shrink: 0;
-  }
+    @keyframes breathing {
+      0%, 100% {
+        box-shadow: 10px 10px 20px #2a2f45, -10px -10px 20px #5c83ff;
+      }
+      50% {
+        box-shadow: 14px 14px 28px #222a3d, -14px -14px 28px #7a94ff;
+      }
+    }
 
-  .ripple-button:hover {
-    border-radius: 24px 6px 24px 6px;
-    transform: scale(1.06);
-    background-color: #0056b3;
-  }
+    .ripple-button:hover {
+      border-radius: 24px 6px 24px 6px;
+      transform: scale(1.06);
+      background-color: #0056b3;
+    }
 
-  .ripple-button:active {
-    transform: scale(0.95);
-    animation-play-state: paused;
-  }
+    .ripple-button:active {
+      transform: scale(0.95);
+      animation-play-state: paused;
+    }
 
-  .ripple {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    animation: ripple-animation linear forwards;
-    pointer-events: none;
-    transform: scale(0);
-    opacity: 1;
-  }
+    .icon {
+      width: 18px;
+      height: 18px;
+      fill: white;
+      flex-shrink: 0;
+    }
 
-  @keyframes ripple-animation {
-    to {
-      transform: scale(4);
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      animation: ripple-animation linear forwards;
+      pointer-events: none;
+      transform: scale(0);
+      opacity: 1;
+    }
+
+    @keyframes ripple-animation {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    .highlight {
+      position: absolute;
+      pointer-events: none;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      filter: blur(60px);
+      mix-blend-mode: screen;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.2s ease;
       opacity: 0;
     }
-  }
 
-  .highlight {
-    position: absolute;
-    pointer-events: none;
-    width: 200px;
-    height: 200px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    filter: blur(60px);
-    mix-blend-mode: screen;
-    transform: translate(-50%, -50%);
-    transition: opacity 0.2s ease;
-    opacity: 0;
-  }
-</style>
+    .progress-container {
+      width: 240px;
+      height: 12px;
+      background: #e0e0e0;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-top: 20px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #00c6ff, #007BFF);
+      transition: width 0.2s ease-out;
+    }
+
+    .instructions {
+      max-width: 400px;
+      margin-top: 30px;
+      font-size: 14px;
+      background: #fff;
+      padding: 16px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: left;
+    }
+
+    .instructions h3 {
+      margin-top: 0;
+    }
+
+    .instructions ul {
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      margin-bottom: 8px;
+    }
+  </style>
 </head>
 <body>
 
-<button class="ripple-button" id="button" aria-label="Learn More Button" tabindex="0">
-  <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-  </svg>
-  Learn More
-  <div class="highlight" id="highlight"></div>
-</button>
+  <button class="ripple-button" id="button" aria-label="Learn More Button" tabindex="0">
+    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+    </svg>
+    Learn More
+    <div class="highlight" id="highlight"></div>
+  </button>
 
-<script>
-  const button = document.getElementById('button');
-  const highlight = document.getElementById('highlight');
+  <div class="progress-container">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
 
-  // For triple click detection
-  let clickTimes = [];
+  <div class="instructions">
+    <h3>🕹️ How to Use the Blue Button</h3>
+    <ul>
+      <li>🔵 <strong>Click to interact</strong>: Watch the progress bar fill up!</li>
+      <li>🔥 <strong>Triple Click</strong>: Click fast 3 times to unlock a surprise!</li>
+      <li>🌈 <strong>Shift + Click</strong>: Enter rainbow mode!</li>
+      <li>🧠 <strong>Secret Code</strong>: Type <code>unlock</code> to reveal hidden content!</li>
+      <li>📈 <strong>Progress Bar</strong>: Fills up using <code>tan⁻¹(clicks)</code> mapping</li>
+    </ul>
+  </div>
 
-  // For secret key combo detection
-  const secretCode = ['u','n','l','o','c','k'];
-  let secretIndex = 0;
+  <script>
+    const button = document.getElementById('button');
+    const highlight = document.getElementById('highlight');
+    const progressBar = document.getElementById('progress-bar');
 
-  // Track last click time for ripple speed calculation
-  let lastClickTime = 0;
+    let clickCount = 0;
+    const maxClicks = 50;
 
-  // Dynamic Neumorphic lighting with highlight
-  window.addEventListener('mousemove', e => {
-    const rect = button.getBoundingClientRect();
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
+    const secretCode = ['u', 'n', 'l', 'o', 'c', 'k'];
+    let secretIndex = 0;
 
-    if (
-      mouseX >= rect.left && mouseX <= rect.right &&
-      mouseY >= rect.top && mouseY <= rect.bottom
-    ) {
-      highlight.style.opacity = '1';
-      highlight.style.left = `${mouseX - rect.left}px`;
-      highlight.style.top = `${mouseY - rect.top}px`;
+    let clickTimes = [];
+    let lastClickTime = 0;
 
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      const offsetX = (mouseX - rect.left - centerX) / 8;
-      const offsetY = (mouseY - rect.top - centerY) / 8;
+    window.addEventListener('mousemove', e => {
+      const rect = button.getBoundingClientRect();
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
 
-      button.style.boxShadow = `
-        ${offsetX}px ${offsetY}px 20px #2a2f45,
-        ${-offsetX}px ${-offsetY}px 20px #5c83ff
-      `;
-    } else {
-      highlight.style.opacity = '0';
-      button.style.boxShadow = `
-        10px 10px 20px #2a2f45,
-        -10px -10px 20px #5c83ff
-      `;
-    }
-  });
+      if (mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom) {
+        highlight.style.opacity = '1';
+        highlight.style.left = `${mouseX - rect.left}px`;
+        highlight.style.top = `${mouseY - rect.top}px`;
 
-  button.addEventListener('click', e => {
-    const now = performance.now();
-    const timeSinceLastClick = now - lastClickTime;
-    lastClickTime = now;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const offsetX = (mouseX - rect.left - centerX) / 8;
+        const offsetY = (mouseY - rect.top - centerY) / 8;
 
-    // Triple-click detection
-    clickTimes.push(now);
-    clickTimes = clickTimes.filter(t => now - t < 600);
-    if (clickTimes.length >= 3) {
-      const originalText = button.innerHTML;
-      button.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> Surprise! 🎉`;
-      setTimeout(() => {
-        button.innerHTML = originalText;
-      }, 3000);
-      clickTimes = [];
+        button.style.boxShadow =
+          `${offsetX}px ${offsetY}px 20px #2a2f45,
+           ${-offsetX}px ${-offsetY}px 20px #5c83ff`;
+      } else {
+        highlight.style.opacity = '0';
+        button.style.boxShadow =
+          '10px 10px 20px #2a2f45, -10px -10px 20px #5c83ff';
+      }
+    });
+
+    function updateProgress() {
+      const x = clickCount;
+      const scale = Math.atan(x / maxClicks);
+      const normalized = scale / (Math.PI / 2); // Normalize to [0,1]
+      progressBar.style.width = `${(normalized * 100).toFixed(2)}%`;
     }
 
-    // Shift+click: rainbow flash
-    if (e.shiftKey) {
-      const originalBg = button.style.backgroundColor;
-      let colors = ['#ff0000','#ff7f00','#ffff00','#00ff00','#0000ff','#4b0082','#9400d3'];
-      let i = 0;
-      const interval = setInterval(() => {
-        button.style.backgroundColor = colors[i];
-        i++;
-        if (i >= colors.length) {
-          clearInterval(interval);
-          button.style.backgroundColor = originalBg || '#007BFF';
+    button.addEventListener('click', e => {
+      const now = performance.now();
+      const timeSinceLastClick = now - lastClickTime;
+      lastClickTime = now;
+
+      clickCount = Math.min(clickCount + 1, maxClicks * 2);
+      updateProgress();
+
+      // Triple-click detection
+      clickTimes.push(now);
+      clickTimes = clickTimes.filter(t => now - t < 600);
+      if (clickTimes.length >= 3) {
+        const originalText = button.innerHTML;
+        button.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> Surprise! 🎉`;
+        setTimeout(() => {
+          button.innerHTML = originalText;
+        }, 3000);
+        clickTimes = [];
+      }
+
+      if (e.shiftKey) {
+        const originalBg = button.style.backgroundColor;
+        let colors = ['#ff0000','#ff7f00','#ffff00','#00ff00','#0000ff','#4b0082','#9400d3'];
+        let i = 0;
+        const interval = setInterval(() => {
+          button.style.backgroundColor = colors[i];
+          i++;
+          if (i >= colors.length) {
+            clearInterval(interval);
+            button.style.backgroundColor = originalBg || '#007BFF';
+          }
+        }, 150);
+      }
+
+      const circle = document.createElement('span');
+      const diameter = Math.max(button.clientWidth, button.clientHeight);
+      const rippleSize = Math.min(diameter * (timeSinceLastClick < 300 ? 0.7 : 1), diameter);
+      const rippleDuration = timeSinceLastClick < 300 ? 300 : 600;
+
+      circle.style.width = circle.style.height = `${rippleSize}px`;
+      circle.style.left = `${e.clientX - button.getBoundingClientRect().left - rippleSize / 2}px`;
+      circle.style.top = `${e.clientY - button.getBoundingClientRect().top - rippleSize / 2}px`;
+      circle.classList.add('ripple');
+      circle.style.animationDuration = `${rippleDuration}ms`;
+
+      const ripple = button.querySelector('.ripple');
+      if (ripple) ripple.remove();
+
+      button.appendChild(circle);
+    });
+
+    button.addEventListener('keydown', e => {
+      if (e.key.toLowerCase() === secretCode[secretIndex]) {
+        secretIndex++;
+        if (secretIndex === secretCode.length) {
+          alert('🔓 Secret unlocked!');
+          secretIndex = 0;
         }
-      }, 150);
-    }
-
-    // Ripple effect with speed-dependent animation duration and size
-    const circle = document.createElement('span');
-    const diameter = Math.max(button.clientWidth, button.clientHeight);
-    const rippleSize = Math.min(diameter * (timeSinceLastClick < 300 ? 0.7 : 1), diameter);
-
-    circle.style.width = circle.style.height = `${rippleSize}px`;
-    circle.style.left = `${e.clientX - button.getBoundingClientRect().left - rippleSize / 2}px`;
-    circle.style.top = `${e.clientY - button.getBoundingClientRect().top - rippleSize / 2}px`;
-    circle.classList.add('ripple');
-    circle.style.animationDuration = `${timeSinceLastClick < 300 ? 300 : 600}ms`;
-
-    const ripple = button.querySelector('.ripple');
-    if (ripple) ripple.remove();
-
-    button.appendChild(circle);
-  });
-
-  // Secret key combo detection
-  button.addEventListener('keydown', e => {
-    if (e.key.toLowerCase() === secretCode[secretIndex]) {
-      secretIndex++;
-      if (secretIndex === secretCode.length) {
-        alert('Button Unlocked! 🚀');
+      } else {
         secretIndex = 0;
       }
-    } else {
-      secretIndex = 0;
-    }
-  });
-</script>
-
+    });
+  </script>
 </body>
 </html>
