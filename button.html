@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ultra-Advanced Blue Button + Progress Bar</title>
+  <title>Ultra-Advanced Blue Button + RL with 50 States</title>
   <style>
     body {
       background: #f0f2f5;
@@ -135,6 +135,107 @@
     .instructions li {
       margin-bottom: 8px;
     }
+
+    /* RL Stats Panel */
+    #rl-stats-panel {
+      position: fixed;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90vw;
+      max-width: 600px;
+      max-height: 70vh;
+      overflow-y: auto;
+      background: #1e1e2f;
+      color: #c9d1d9;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+      padding: 20px 30px 30px 30px;
+      font-family: "Source Code Pro", monospace, monospace;
+      font-size: 14px;
+      white-space: nowrap;
+      z-index: 10000;
+      display: none;
+    }
+
+    #rl-stats-title {
+      font-weight: 700;
+      font-size: 22px;
+      margin-bottom: 10px;
+      color: #58a6ff;
+      text-align: center;
+    }
+
+    #rl-stats-close {
+      position: absolute;
+      top: 12px;
+      right: 15px;
+      background: none;
+      border: none;
+      font-size: 28px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #58a6ff;
+      transition: color 0.2s ease;
+    }
+
+    #rl-stats-close:hover {
+      color: #1f6feb;
+    }
+
+    #rl-stats-content {
+      margin-top: 15px;
+      line-height: 1.5;
+    }
+
+    #rl-stats-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    #rl-stats-content th,
+    #rl-stats-content td {
+      padding: 6px 8px;
+      text-align: center;
+      border-bottom: 1px solid #303050;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #rl-stats-content th {
+      background-color: #27293d;
+      color: #58a6ff;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    #rl-stats-content tr:nth-child(even) {
+      background-color: #222239;
+    }
+
+    #rl-stats-content tr:hover {
+      background-color: #3b3f68;
+      color: #a3b8ff;
+    }
+
+    /* Button to toggle RL stats */
+    #rl-stats-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-weight: 600;
+      background: #0056b3;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    #rl-stats-btn:hover {
+      background: #003d7a;
+    }
   </style>
 </head>
 <body>
@@ -149,6 +250,14 @@
 
   <div class="progress-container">
     <div class="progress-bar" id="progress-bar"></div>
+  </div>
+
+  <button id="rl-stats-btn">Show RL Stats</button>
+
+  <div id="rl-stats-panel" role="dialog" aria-modal="true" aria-labelledby="rl-stats-title">
+    <button id="rl-stats-close" aria-label="Close RL Stats Panel">&times;</button>
+    <h2 id="rl-stats-title">Reinforcement Learning Stats</h2>
+    <div id="rl-stats-content"></div>
   </div>
 
   <div class="instructions">
@@ -166,6 +275,10 @@
     const button = document.getElementById('button');
     const highlight = document.getElementById('highlight');
     const progressBar = document.getElementById('progress-bar');
+    const rlStatsBtn = document.getElementById('rl-stats-btn');
+    const rlStatsPanel = document.getElementById('rl-stats-panel');
+    const rlStatsClose = document.getElementById('rl-stats-close');
+    const rlStatsContent = document.getElementById('rl-stats-content');
 
     let clickCount = 0;
     const maxClicks = 50;
@@ -176,6 +289,107 @@
     let clickTimes = [];
     let lastClickTime = 0;
 
+    // RL Variables
+    const states = Array.from({length: 51}, (_, i) => i); // states 0 to 50
+    const actions = ["click", "shiftClick", "tripleClick"];
+
+    // Initialize Q-table: state -> action -> value
+    const Q = {};
+    states.forEach(state => {
+      Q[state] = {};
+      actions.forEach(action => {
+        Q[state][action] = 0;
+      });
+    });
+
+    // Parameters
+    const alpha = 0.1;  // learning rate
+    const gamma = 0.9;  // discount factor
+
+    let currentState = 0;
+    let totalReward = 0;
+    let episode = 1;
+
+    // Reward function
+    function getReward(action) {
+      switch(action) {
+        case "click": return 1;
+        case "shiftClick": return 3;
+        case "tripleClick": return 5;
+        default: return 0;
+      }
+    }
+
+    // Update Q-value using Bellman equation
+    function updateQ(state, action, nextState) {
+      const reward = getReward(action);
+      const maxNext = Math.max(...Object.values(Q[nextState]));
+      Q[state][action] = Q[state][action] + alpha * (reward + gamma * maxNext - Q[state][action]);
+      totalReward += reward;
+    }
+
+    // Update progress bar (using arctan mapping)
+    function updateProgress() {
+      const x = clickCount;
+      const scale = Math.atan(x / maxClicks);
+      const normalized = scale / (Math.PI / 2); // Normalize to [0,1]
+      progressBar.style.width = `${(normalized * 100).toFixed(2)}%`;
+    }
+
+    // RL State logic: currentState = clickCount (0..50)
+    function onClickAction(action) {
+      const prevState = currentState;
+      // Next state is basically the new clickCount, capped at maxClicks
+      if (action === "click" || action === "shiftClick" || action === "tripleClick") {
+        currentState = Math.min(clickCount, maxClicks);
+      } else {
+        currentState = 0;
+      }
+      updateQ(prevState, action, currentState);
+
+      // Update RL stats panel if visible
+      if (rlStatsPanel.style.display === 'block') {
+        updateRLStatsPanel();
+      }
+    }
+
+    // Function to render RL stats
+    function updateRLStatsPanel() {
+      let content = `<p><strong>Episode:</strong> ${episode}</p>`;
+      content += `<p><strong>Total Reward:</strong> ${totalReward.toFixed(2)}</p>`;
+      content += `<p><strong>Q-Table (State-Action Values)</strong></p>`;
+      content += `<table><thead><tr><th>State</th><th>Click</th><th>Shift+Click</th><th>TripleClick</th></tr></thead><tbody>`;
+      states.forEach(state => {
+        const vals = Q[state];
+        content += `<tr>
+          <td>${state}</td>
+          <td>${vals.click.toFixed(2)}</td>
+          <td>${vals.shiftClick.toFixed(2)}</td>
+          <td>${vals.tripleClick.toFixed(2)}</td>
+        </tr>`;
+      });
+      content += `</tbody></table>`;
+      rlStatsContent.innerHTML = content;
+    }
+
+    // Show/hide RL stats panel
+    rlStatsBtn.addEventListener('click', () => {
+      if (rlStatsPanel.style.display === 'none' || rlStatsPanel.style.display === '') {
+        updateRLStatsPanel();
+        rlStatsPanel.style.display = 'block';
+        rlStatsBtn.textContent = 'Hide RL Stats';
+      } else {
+        rlStatsPanel.style.display = 'none';
+        rlStatsBtn.textContent = 'Show RL Stats';
+      }
+    });
+
+    rlStatsClose.addEventListener('click', () => {
+      rlStatsPanel.style.display = 'none';
+      rlStatsBtn.textContent = 'Show RL Stats';
+    });
+
+    // Button mousemove highlight & shadow effect
     window.addEventListener('mousemove', e => {
       const rect = button.getBoundingClientRect();
       const mouseX = e.clientX;
@@ -201,34 +415,36 @@
       }
     });
 
-    function updateProgress() {
-      const x = clickCount;
-      const scale = Math.atan(x / maxClicks);
-      const normalized = scale / (Math.PI / 2); // Normalize to [0,1]
-      progressBar.style.width = `${(normalized * 100).toFixed(2)}%`;
-    }
-
+    // Click handler for button
     button.addEventListener('click', e => {
       const now = performance.now();
       const timeSinceLastClick = now - lastClickTime;
       lastClickTime = now;
 
-      clickCount = Math.min(clickCount + 1, maxClicks * 2);
+      clickCount = Math.min(clickCount + 1, maxClicks * 2); // allow overflow for interaction purposes
       updateProgress();
 
       // Triple-click detection
       clickTimes.push(now);
       clickTimes = clickTimes.filter(t => now - t < 600);
       if (clickTimes.length >= 3) {
+        // RL update for triple click
+        onClickAction("tripleClick");
+
         const originalText = button.innerHTML;
         button.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> Surprise! 🎉`;
         setTimeout(() => {
           button.innerHTML = originalText;
         }, 3000);
         clickTimes = [];
+        return;
       }
 
+      // Shift+Click rainbow effect
       if (e.shiftKey) {
+        // RL update for shiftClick
+        onClickAction("shiftClick");
+
         const originalBg = button.style.backgroundColor;
         let colors = ['#ff0000','#ff7f00','#ffff00','#00ff00','#0000ff','#4b0082','#9400d3'];
         let i = 0;
@@ -240,8 +456,12 @@
             button.style.backgroundColor = originalBg || '#007BFF';
           }
         }, 150);
+      } else {
+        // RL update for click
+        onClickAction("click");
       }
 
+      // Ripple effect
       const circle = document.createElement('span');
       const diameter = Math.max(button.clientWidth, button.clientHeight);
       const rippleSize = Math.min(diameter * (timeSinceLastClick < 300 ? 0.7 : 1), diameter);
@@ -259,12 +479,16 @@
       button.appendChild(circle);
     });
 
-    button.addEventListener('keydown', e => {
+    // Secret code unlock detection
+    window.addEventListener('keydown', e => {
       if (e.key.toLowerCase() === secretCode[secretIndex]) {
         secretIndex++;
         if (secretIndex === secretCode.length) {
           alert('🔓 Secret unlocked!');
           secretIndex = 0;
+
+          // Not included in Q-table, but could add a special reward if desired
+          // For now no RL update on secret code
         }
       } else {
         secretIndex = 0;
